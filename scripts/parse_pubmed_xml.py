@@ -49,9 +49,15 @@ for article in root.findall(".//PubmedArticle"):
     if snakemake.config['exclude_articles']['missing_abstract'] and abstract == "":
         continue
 
-    # extract pmid/doi
+    # extract pmid
     pmid = article.find(".//ArticleId[@IdType='pubmed']").text
 
+    # exclude any entries with malformed/non-numeric pubmed ids; only one such id encountered so
+    # far: "17181r22""
+    if pmid is not None and not pmid.isnumeric():
+        continue
+
+    # extract doi
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
 
     if doi_elem is None or doi_elem.text is None:
