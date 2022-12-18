@@ -1,5 +1,5 @@
 """
-lit-embed: PubMed Data Preparation
+lit-explore: PubMed Data Preparation
 """
 import os
 from os.path import join
@@ -22,14 +22,14 @@ batches = pubmed_annual + pubmed_updates
 
 rule all:
     input:
-        join(config['out_dir'], "corpus/raw.csv"),
-        join(config['out_dir'], "corpus/lemmatized.csv")
+        join(config["out_dir"], "corpus/raw.csv"),
+        join(config["out_dir"], "corpus/lemmatized.csv")
 
 rule combine_pubmed_articles:
     input:
         expand(join(config["out_dir"], "raw/{pubmed_num}.feather"), pubmed_num=batches)
     output:
-        join(config['out_dir'], "corpus/raw.csv")
+        join(config["out_dir"], "corpus/raw.csv")
     script:
         "scripts/combine_articles.py"
 
@@ -37,7 +37,7 @@ rule combine_pubmed_lemmatized_articles:
     input:
         expand(join(config["out_dir"], "lemmatized/{pubmed_num}.feather"), pubmed_num=batches)
     output:
-        join(config['out_dir'], "corpus/lemmatized.csv")
+        join(config["out_dir"], "corpus/lemmatized.csv")
     script:
         "scripts/combine_articles.py"
 

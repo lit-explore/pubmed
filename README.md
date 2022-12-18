@@ -15,7 +15,7 @@ These files are then parsed, and the following fields are extracted for each art
 4. Abstract
 5. Date
 
-The "ID" field in this case refers to the articles PubMed ID (PMID). In some cases, one or more of
+The "ID" field in this case refers to the article's PubMed ID (PMID). In some cases, one or more of
 the fields may be missing, and the pipeline can be configured to optionally exclude articles which
 are missing either/both title and abstract information.
 
@@ -51,3 +51,7 @@ settings, e.g.:
 ```
 snakemake -j4 --configfile config/config.yml
 ```
+
+## Related
+
+For a similar pipeline for retrieving and processing arXiv data, see: [lit-explore/arxiv](https://github.com/lit-explore/arxiv).
