@@ -34,7 +34,7 @@ for ind, article in corpus.iterrows():
     #  if snakemake.config['exclude_articles']['missing_abstract'] and article.abstract == "":
     #      continue
 
-    ids.append(article.id)
+    ids.append(int(article.id))
     dois.append(article.doi)
 
     # process title and abstract together to reduce overhead;
@@ -86,9 +86,9 @@ for ind, article in corpus.iterrows():
     lemma_abstracts.append(abstract)
 
 df = pd.DataFrame({
-    "id": ids, 
-    "doi": dois, 
-    "title": lemma_titles, 
+    "id": ids,
+    "doi": dois,
+    "title": lemma_titles,
     "abstract": lemma_abstracts
 })
 

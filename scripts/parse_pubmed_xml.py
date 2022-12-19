@@ -89,7 +89,7 @@ for article in root.findall(".//PubmedArticle"):
     title = " ".join([x for x in title.split() if len(x) <= MAX_LEN])
     abstract = " ".join([x for x in abstract.split() if len(x) <= MAX_LEN])
 
-    pmids.append(pmid)
+    pmids.append(int(pmid))
     dois.append(doi)
     titles.append(title)
     abstracts.append(abstract)
