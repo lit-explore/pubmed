@@ -1,9 +1,6 @@
 """
 Create a single file containing all article texts;
 simplifies downstream processing.
-
-CSV is used in place of feather for this step due to memory issues with feather and
-large text-based columns.
 """
 import random
 import pandas as pd
@@ -48,7 +45,5 @@ if num_dups > 0:
     print(f"Dropping {num_dups} duplicated article entries")
     combined = combined[~combined['id'].duplicated(keep='last')]
 
-# storing as plain csv for now; arrow/feather runs into memory issues with larger
-# text columns
 combined = combined.reset_index(drop=True)
-combined.to_csv(snakemake.output[0], index=False)
+combined.to_feather(snakemake.output[0])

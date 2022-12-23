@@ -22,14 +22,14 @@ batches = pubmed_annual + pubmed_updates
 
 rule all:
     input:
-        join(config["out_dir"], "corpus/raw.csv"),
-        join(config["out_dir"], "corpus/lemmatized.csv")
+        join(config["out_dir"], "corpus/raw.feather"),
+        join(config["out_dir"], "corpus/lemmatized.feather")
 
 rule combine_pubmed_articles:
     input:
         expand(join(config["out_dir"], "raw/{pubmed_num}.feather"), pubmed_num=batches)
     output:
-        join(config["out_dir"], "corpus/raw.csv")
+        join(config["out_dir"], "corpus/raw.feather")
     script:
         "scripts/combine_articles.py"
 
@@ -37,7 +37,7 @@ rule combine_pubmed_lemmatized_articles:
     input:
         expand(join(config["out_dir"], "lemmatized/{pubmed_num}.feather"), pubmed_num=batches)
     output:
-        join(config["out_dir"], "corpus/lemmatized.csv")
+        join(config["out_dir"], "corpus/lemmatized.feather")
     script:
         "scripts/combine_articles.py"
 
