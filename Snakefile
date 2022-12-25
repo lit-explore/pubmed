@@ -23,7 +23,8 @@ batches = pubmed_annual + pubmed_updates
 rule all:
     input:
         join(config["out_dir"], "corpus/raw.feather"),
-        join(config["out_dir"], "corpus/lemmatized.feather")
+        join(config["out_dir"], "corpus/lemmatized.feather"),
+        join(config["out_dir"], "revisions.feather")
 
 rule combine_pubmed_articles:
     input:
@@ -58,6 +59,22 @@ rule parse_pubmed_xml:
         join(config["out_dir"], "raw/{pubmed_num}.feather")
     script:
         "scripts/parse_pubmed_xml.py"
+
+rule combine_revisions:
+    input:
+        expand(join(config["out_dir"], "revisions/{pubmed_num}.feather"), pubmed_num=batches)
+    output:
+        join(config["out_dir"], "revisions.feather")
+    script:
+        "scripts/combine_revisions.py"
+
+rule extract_revisions:
+    input: 
+        join(config["out_dir"], "xml/pubmed22n{pubmed_num}.xml.gz")
+    output:
+        join(config["out_dir"], "revisions/{pubmed_num}.feather")
+    script:
+        "scripts/extract_revisions.py"
 
 rule download_pubmed_data:
     output:
