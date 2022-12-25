@@ -9,7 +9,7 @@ out_dir: "/data/pubmed"
 pubmed:
   # start and end number for annual files
   # https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
-  annual_start: 1000
+  annual_start: 1
   annual_end: 1114
   # start and end number for daily updates
   # https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
