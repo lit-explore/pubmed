@@ -2,28 +2,31 @@
 Parses Pubmed XML data and extract article pmid, title, and abstract information
 """
 import gzip
+from datetime import datetime
+from typing import List
 import xml.etree.ElementTree as ET
 import pandas as pd
-from datetime import datetime
 
-with gzip.open(snakemake.input[0], "r") as fp:
+# assign "snakemake" to another variable to avoid excessive warnings
+snek = snakemake
+
+# load article revision info
+revisions = pd.read_feather(snek.input[1])
+
+# load article xml
+with gzip.open(snek.input[0], "r") as fp:
     tree = ET.parse(fp)
 
 root = tree.getroot()
 
-pmids = []
-dois = []
-dates = []
-titles = []
-abstracts = []
+pmids:List[int] = []
+dois:List[str] = []
+dates:List[str] = []
+titles:List[str] = []
+abstracts:List[str] = []
 
 # max token length
-MAX_LEN = snakemake.config['tokens']['max_len']
-
-# TESTING
-import os
-if os.path.basename(snakemake.input[0]) == "pubmed22n0654.xml.gz":
-    breakpoint()
+MAX_LEN = snek.config['tokens']['max_len']
 
 # iterate over articles in xml file
 for article in root.findall(".//PubmedArticle"):
@@ -35,7 +38,7 @@ for article in root.findall(".//PubmedArticle"):
     else:
         title = title_elem.text.replace('\n', ' ').strip()
 
-    if snakemake.config['exclude_articles']['missing_title'] and title == "":
+    if snek.config['exclude_articles']['missing_title'] and title == "":
         continue
 
     # extract abstract
@@ -46,16 +49,22 @@ for article in root.findall(".//PubmedArticle"):
     else:
         abstract = abstract_elem.text.replace('\n', ' ').strip()
 
-    if snakemake.config['exclude_articles']['missing_abstract'] and abstract == "":
+    if snek.config['exclude_articles']['missing_abstract'] and abstract == "":
         continue
 
     # extract pmid
-    pmid = article.find(".//ArticleId[@IdType='pubmed']").text
+    pmid_elem = article.find(".//ArticleId[@IdType='pubmed']")
 
-    # exclude any entries with malformed/non-numeric pubmed ids; only one such id encountered so
-    # far: "17181r22""
-    if pmid is not None and not pmid.isnumeric():
+    if pmid_elem is not None:
+        # exclude any entries with malformed/non-numeric pubmed ids; only one such id encountered so
+        # far: "17181r22""
+        if not pmid_elem.text.isnumeric():
+            continue
+
+        pmid = int(pmid_elem.text)
+    else:
         continue
+
 
     # extract doi
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
@@ -85,11 +94,20 @@ for article in root.findall(".//PubmedArticle"):
         # if date parsing fails, just leave field blank
         date_str = ""
 
+    # if multiple revisions for an article are present, only keep the most recent one
+    revs = revisions[revisions.id == pmid]
+
+    if revs.shape[0] > 1:
+        last_rev = revs.sort_values('date').tail(1).date.values[0]
+
+        if last_rev != date_str:
+            continue
+
     # remove excessively long tokens
     title = " ".join([x for x in title.split() if len(x) <= MAX_LEN])
     abstract = " ".join([x for x in abstract.split() if len(x) <= MAX_LEN])
 
-    pmids.append(int(pmid))
+    pmids.append(pmid)
     dois.append(doi)
     titles.append(title)
     abstracts.append(abstract)
@@ -100,4 +118,4 @@ dat = pd.DataFrame({"id": pmids, "doi": dois, "title": titles, "abstract": abstr
 if dat.shape[0] == 0:
     raise Exception("No articles found with all require components!")
 
-dat.reset_index(drop=True).to_feather(snakemake.output[0])
+dat.reset_index(drop=True).to_feather(snek.output[0])

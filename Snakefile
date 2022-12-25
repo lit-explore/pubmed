@@ -54,7 +54,8 @@ rule create_lemmatized_pubmed_corpus:
 
 rule parse_pubmed_xml:
     input: 
-        join(config["out_dir"], "xml/pubmed22n{pubmed_num}.xml.gz")
+        join(config["out_dir"], "xml/pubmed22n{pubmed_num}.xml.gz"),
+        join(config["out_dir"], "revisions.feather")
     output:
         join(config["out_dir"], "raw/{pubmed_num}.feather")
     script:
