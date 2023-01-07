@@ -7,15 +7,7 @@ import pandas as pd
 
 article_batches = snakemake.input
 
-# if dev-mode is enabled, subsample articles
-if snakemake.config['dev_mode']['enabled']:
-    max_articles = snakemake.config['dev_mode']['num_articles']
-
-    # shuffle article batches (pubmed batches are ordered by date)
-    random.seed(snakemake.config['random_seed'])
-    random.shuffle(article_batches)
-else:
-    max_articles = float('inf')
+max_articles = float('inf')
 
 combined = pd.read_feather(article_batches[0])
 
@@ -33,9 +25,6 @@ for i, infile in enumerate(article_batches[1:]):
     # append article batch to growing dataframe
     df = pd.read_feather(infile)
     combined = pd.concat([combined, df])
-
-if snakemake.config['dev_mode']['enabled']:
-    combined = combined.sample(max_articles, random_state=snakemake.config['random_seed'])
 
 # if multiple versions of the same article are encountered, keep only the most recent
 # record for each
