@@ -154,6 +154,11 @@ for article in root.findall(".//PubmedArticle"):
     title = " ".join([x for x in title.split() if len(x) <= MAX_LEN])
     abstract = " ".join([x for x in abstract.split() if len(x) <= MAX_LEN])
 
+    # replace underscores with HTML-encoded representations to simplify downstream handling of
+    # n-gram tokens
+    title = title.replace("_", "%5f")
+    abstract = abstract.replace("_", "%5f")
+
     pmids.append(pmid)
     dois.append(doi)
     titles.append(title)
