@@ -2,7 +2,6 @@
 Create a single file containing all article texts;
 simplifies downstream processing.
 """
-import random
 import pandas as pd
 
 snek = snakemake
@@ -21,4 +20,7 @@ for i, infile in enumerate(snek.input[1:]):
     combined = pd.concat([combined, df])
 
 combined = combined.reset_index(drop=True)
+
+combined.id = combined.id.astype('int')
+
 combined.to_feather(snek.output[0])
