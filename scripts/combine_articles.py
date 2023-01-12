@@ -5,34 +5,20 @@ simplifies downstream processing.
 import random
 import pandas as pd
 
-article_batches = snakemake.input
+snek = snakemake
 
-max_articles = float('inf')
+combined = pd.read_feather(snek.input[0])
 
-combined = pd.read_feather(article_batches[0])
-
-num_batches = len(article_batches)
+num_batches = len(snek.input)
 
 # iterate over batches of articles
-for i, infile in enumerate(article_batches[1:]):
+for i, infile in enumerate(snek.input[1:]):
     if (i % 100 == 0) and i != 0:
         print(f"Processing article batch {i}/{num_batches}...")
-
-    # if sub-sampling is enabled, stop once the desired article count has been reached
-    if combined.shape[0] >= max_articles:
-        break
 
     # append article batch to growing dataframe
     df = pd.read_feather(infile)
     combined = pd.concat([combined, df])
 
-# if multiple versions of the same article are encountered, keep only the most recent
-# record for each
-num_dups = combined['id'].duplicated().sum()
-
-if num_dups > 0:
-    print(f"Dropping {num_dups} duplicated article entries")
-    combined = combined[~combined['id'].duplicated(keep='last')]
-
 combined = combined.reset_index(drop=True)
-combined.to_feather(snakemake.output[0])
+combined.to_feather(snek.output[0])
