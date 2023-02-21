@@ -129,6 +129,15 @@ for article in root.findall(".//PubmedArticle"):
     else:
         continue
 
+    # if the article has already been included, skip;
+    # this should only occur when multiple revisions are made for the same article on the same day,
+    # in which case, the first entry encountered will be kept.
+
+    # in the future, it may be good to modify the revision checking logic to all track the revision
+    # "version" so that these can be differentiated and the most recent version retained.
+    if pmid in pmids:
+        continue
+
     # extract doi
     doi_elem = article.find(".//ArticleId[@IdType='doi']")
 
