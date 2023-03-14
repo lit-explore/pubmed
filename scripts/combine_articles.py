@@ -23,4 +23,15 @@ combined = combined.reset_index(drop=True)
 
 combined.id = combined.id.astype('int')
 
+num_before = combined.shape[0]
+
+# in case any duplicated article entries remain even after filtering by revision, keep only a single
+# article entry 
+combined = combined[~combined.id.duplicated()]
+
+num_after = combined.shape[0]
+
+if num_before != num_after:
+    print(f"Removed {num_before - num_after} duplicate article entries.")
+
 combined.to_feather(snek.output[0])

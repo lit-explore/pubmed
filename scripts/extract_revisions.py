@@ -8,13 +8,15 @@ from typing import List
 from datetime import datetime
 import pandas as pd
 
-with gzip.open(snakemake.input[0], "r") as fp:
+snek = snakemake
+
+with gzip.open(snek.input[0], "r") as fp:
     tree = ET.parse(fp)
 
 root = tree.getroot()
 
 files:List[str] = []
-pmids:List[str] = []
+pmids:List[int] = []
 dates:List[str] = []
 
 # iterate over articles in xml file
@@ -40,7 +42,7 @@ for article in root.findall(".//PubmedArticle"):
 
     date_str = datetime.strptime(f"{year} {month} {day}", DATE_FORMAT).isoformat()
 
-    files.append(os.path.basename(snakemake.input[0]))
+    files.append(os.path.basename(snek.input[0]))
     pmids.append(int(pmid))
     dates.append(date_str)
 
@@ -49,4 +51,4 @@ dat = pd.DataFrame({"id": pmids, "file": files, "date": dates})
 if dat.shape[0] == 0:
     raise Exception("No articles found with all require components!")
 
-dat.reset_index(drop=True).to_feather(snakemake.output[0])
+dat.reset_index(drop=True).to_feather(snek.output[0])
